@@ -3,6 +3,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "CharacterAnimInstance.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "../Input/CharacterInput.h"
 
 
@@ -87,6 +88,13 @@ AMyCharacter::AMyCharacter()
 	mCamera->PostProcessSettings.bOverride_DepthOfFieldDepthBlurAmount = true;
 	mCamera->PostProcessSettings.bOverride_DepthOfFieldDepthBlurRadius = true;
 
+	static ConstructorHelpers::FObjectFinder<USoundBase> FootstepAsset(TEXT("/Script/Engine.SoundWave'/Game/Essential_Foosteps_SK/WAV/Concrete/Footstep_Concrete_Boots_Jog_1.Footstep_Concrete_Boots_Jog_1'"));
+	if(FootstepAsset.Succeeded())
+	{
+		FootstepSound = FootstepAsset.Object;
+	}
+
+	FootstepInterval = 0.4f;
 }
 
 
@@ -160,6 +168,25 @@ void AMyCharacter::Tick(float DeltaTime)
 	mCamera->PostProcessSettings.DepthOfFieldFocalDistance = FocusLocation;
 	mCamera->PostProcessSettings.DepthOfFieldDepthBlurAmount = 10.f;
 	mCamera->PostProcessSettings.DepthOfFieldDepthBlurRadius = 1.f;
+
+
+
+	// 이동 중일 때만 발소리 타이머 진행
+	if (bIsMoving)
+	{
+		FootstepTimer += DeltaTime;
+
+		if (FootstepTimer >= FootstepInterval)
+		{
+			PlayFoootstep();
+			FootstepTimer = 0.f;
+		}
+	}
+
+	else
+	{
+		FootstepTimer = 0.f;
+	}
 }
 
 void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -187,6 +214,8 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInput->BindAction(InputCDO->mPick, ETriggerEvent::Started, this, &AMyCharacter::PickKey);
 
 		EnhancedInput->BindAction(InputCDO->mOpen, ETriggerEvent::Triggered, this, &AMyCharacter::OpenKey);
+
+		EnhancedInput->BindAction(InputCDO->mMove, ETriggerEvent::Completed, this, &AMyCharacter::StopMove);
 	}
 }
 
@@ -198,6 +227,14 @@ void AMyCharacter::MoveKey(const FInputActionValue& Value)
 	AddMovementInput(GetActorForwardVector(), Dir.X);
 	AddMovementInput(GetActorRightVector(), Dir.Y);
 
+	// 이동중인지 체크
+	bIsMoving = !Dir.IsNearlyZero();
+}
+
+void AMyCharacter::StopMove(const FInputActionValue& Value)
+{
+	bIsMoving = false;
+	FootstepTimer = 0.f; // 잔여 타이밍 제거
 }
 
 void AMyCharacter::CameraRoatationKey(const FInputActionValue& Value)
@@ -285,6 +322,14 @@ void AMyCharacter::OpenKey(const FInputActionValue& Value)
 	if (Value.Get<bool>())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[Open] R pressed"));
+	}
+}
+
+void AMyCharacter::PlayFoootstep()
+{
+	if (FootstepSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), FootstepSound, GetActorLocation());
 	}
 }
 

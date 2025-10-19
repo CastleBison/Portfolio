@@ -7,6 +7,7 @@
 #include "CharacterAnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Sound/SoundCue.h"
 #include "MyCharacter.generated.h"
 
 UCLASS()
@@ -77,4 +78,17 @@ public:
 	void PickKey(const FInputActionValue& Value);
 	void OpenKey(const FInputActionValue& Value);
 
+	void StopMove(const FInputActionValue& Value);
+
+private:
+	void PlayFoootstep();
+
+	FVector CurrentMoveDir;
+	bool bIsMoving = false;
+
+	float FootstepTimer = 0.0f;
+	float FootstepInterval = 0.4f;
+
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* FootstepSound;
 };
