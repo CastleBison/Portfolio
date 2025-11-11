@@ -3,7 +3,7 @@
 C++과 Blueprint를 혼합해 조명 자동제어, 퍼즐 트리거, 문·키패드 상호작용 등을 구현했으며 실시간 빛의 변화와 플레이어 경험을 연결하는 구조를 학습하기 위한 목적의 프로젝트입니다.
 
 ## 플레이 영상 링크 (유튜브)
-https://youtu.be/dvbiTv6PgNM
+[https://youtu.be/dvbiTv6PgNM](https://youtu.be/otNYKGshHyY?si=2fFQtN9CHd-8x5Rx)
 
 
 # Luminarch (루미나크)
